@@ -157,17 +157,20 @@ public class Figure : MonoBehaviour
                 MoveRight();
             }
 
-            if (Input.GetKey(KeyCode.LeftArrow)) // to Left
+            // to Left
+            if (Input.GetKey(KeyCode.LeftArrow)) 
             {
                 MoveLeft();
             }
 
-            if (Input.GetKeyDown(KeyCode.UpArrow))   // Rotation
+            // Rotation
+            if (Input.GetKeyDown(KeyCode.UpArrow))   
             {
                 Rotate();
             }
 
-            if (Input.GetKey(KeyCode.DownArrow) || Time.time - _fall >= _fallSpeed)    //Move Down
+            //Move Down
+            if (Input.GetKey(KeyCode.DownArrow) || Time.time - _fall >= _fallSpeed)    
             {
                 MoveDown();
             }

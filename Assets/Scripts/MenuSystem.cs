@@ -34,7 +34,7 @@ public class MenuSystem : MonoBehaviour
     }
     #endregion
 
-    void Start()
+    private void Start()
     {
         UpdateHighScoreMenuView();
         levelSelectedText.SetText("LEVEL 0");

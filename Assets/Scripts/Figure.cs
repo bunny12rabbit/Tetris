@@ -5,21 +5,27 @@ using UnityEngine;
 public class Figure : MonoBehaviour
 {
     #region Private variables shown in the inspector
-    [SerializeField] private float continuousVerticalSpeed = 0.01f; //  The delay which the figure will have while moving when the down button is held
-    [SerializeField] private float continuousHorizontalSpeed = 0.05f;    //  The delay which the figure will have while moving when the left or right buttons are held
-    [SerializeField] private bool allowRotation = true;   //  Used this to scecify whether of not the figure is allowed to rotate
-    [SerializeField] private bool limitRotation = false;  //  Used to limit the rotation of the figure to a 90 / -90 rotation (To / From)
-    [SerializeField] private int individualScore = 100;   //  The score that player suppose to get if he immediately set the figure down
+    
+    //  Used to scecify whether of not the figure is allowed to rotate
+    [SerializeField] private bool _allowRotation = true;
+    //  Used to limit the rotation of the figure to a 90 / -90 rotation (To / From)
+    [SerializeField] private bool _limitRotation = false;  
     #endregion
 
     #region Private variables
     private float _verticalTimer = 0;
     private float _horizontalTimer = 0;
-    private float _buttonDownDelay = 0.05f;   // How long to wait before the figure recognizes that a button is being held
+
+    //  The score that player suppose to get if he immediately set the figure down
+    private int _individualScore;
+
+    // How long to wait before the figure recognizes that a button is being held
+    private float _buttonDownDelay = 0.05f;   
     private float _buttonDownWaitTimerHorizontal = 0;
     private float _buttonDownWaitTimerVertical = 0;
     private float _fallSpeed;
-    private float _fall = 0; //  Counddown timer for fall speed
+    //  Counddown timer for fall speed
+    private float _fall = 0; 
 
     private bool _movedImmediateHorizontal = false;
     private bool _movedImmediateVertical = false;
@@ -29,15 +35,16 @@ public class Figure : MonoBehaviour
     #endregion
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        _fallSpeed = Game.fallSpeed;
+        _fallSpeed = Game.instance.fallSpeed;
+        _individualScore = Game.instance.individualScore;
     }
 
     /// <summary>
     /// Update this instance
     /// </summary>
-    void Update()
+    private void Update()
     {
         UpdateFallSpeed();
         CheckUserInput();
@@ -47,12 +54,12 @@ public class Figure : MonoBehaviour
     /// <summary>
     /// Updates falling speed of figures (levels)
     /// </summary>
-    void UpdateFallSpeed()
+    private void UpdateFallSpeed()
     {
-        _fallSpeed = Game.fallSpeed;
+        _fallSpeed = Game.instance.fallSpeed;
     }
 
-    void UpdateIndividualScore()
+    private void UpdateIndividualScore()
     {
         if (_individualScoreTime < 1)
         {
@@ -61,7 +68,7 @@ public class Figure : MonoBehaviour
         else
         {
             _individualScoreTime = 0;
-            individualScore = Mathf.Max(individualScore - 10, 0);
+            _individualScore = Mathf.Max(_individualScore - 10, 0);
         }
     }
     /// <summary>
@@ -71,11 +78,11 @@ public class Figure : MonoBehaviour
     ///  Down will move the figure 1 unit down
     ///  Up will rotate the figure
     /// </summary>
-    void CheckUserInput()
+    private void CheckUserInput()
     {
 
 
-        if (!Game.gameOver)
+        if (!Game.instance.gameOver)
         {
 #if UNITY_ANDROID
 
@@ -168,37 +175,6 @@ public class Figure : MonoBehaviour
 #endif
         }
         
-        bool CheckLeftOrRightMoveOneceTouch(Touch touch) => touch.phase == TouchPhase.Ended &&
-            (touch.position.x > Screen.width / 2 || touch.position.x < Screen.width / 2);
-
-        bool CheckDownMoveOneceTouch(Touch touch) => touch.phase == TouchPhase.Ended &&
-            (touch.position.x < Screen.width / 2 && touch.position.y < Screen.height / 3);
-
-        void ResetBtnPressedTimersVertical()
-        {
-            _movedImmediateHorizontal = false;
-            _horizontalTimer = 0;
-            _buttonDownWaitTimerHorizontal = 0;
-        }
-
-        void ResetBtnPressedHorizontal()
-        {
-            _movedImmediateVertical = false;
-            _verticalTimer = 0;
-            _buttonDownWaitTimerVertical = 0;
-        }
-
-        bool WannaMoveRightTouch(Touch touch) => touch.phase == TouchPhase.Stationary &&
-            (touch.position.x > Screen.width / 2 && touch.position.y > Screen.height / 4);
-
-        bool WannaMoveLeftTouch(Touch touch) => touch.phase == TouchPhase.Stationary &&
-            (touch.position.x < Screen.width / 2 && touch.position.y > Screen.height / 4);
-
-        bool WannaMoveDownTouch(Touch touch) => touch.phase == TouchPhase.Stationary &&
-            (touch.position.x < Screen.width / 2 && touch.position.y < Screen.height / 4);
-
-        bool WannaRotateTouch(Touch touch) => touch.phase == TouchPhase.Ended &&
-            (touch.position.x > Screen.width / 2 && touch.position.y < Screen.height / 4);
 
         //  Moves the figure Right
         void MoveRight()
@@ -213,7 +189,7 @@ public class Figure : MonoBehaviour
                 }
 
                 //  Delay between the moves when button held
-                if (_horizontalTimer < continuousHorizontalSpeed)
+                if (_horizontalTimer < Game.instance._continuousHorizontalSpeed)
                 {
                     _horizontalTimer += Time.deltaTime;
                     return;
@@ -257,7 +233,7 @@ public class Figure : MonoBehaviour
                 }
 
                 //  Delay for the move when button held
-                if (_horizontalTimer < continuousHorizontalSpeed)
+                if (_horizontalTimer < Game.instance._continuousHorizontalSpeed)
                 {
                     _horizontalTimer += Time.deltaTime;
                     return;
@@ -288,10 +264,10 @@ public class Figure : MonoBehaviour
         void Rotate()
         {
             //  The up key was pressed, let's fires check if the figure is allowed to rotate
-            if (allowRotation)
+            if (_allowRotation)
             {
                 //  If it is, then need to check if the rotation is limited to just back and forth
-                if (limitRotation)
+                if (_limitRotation)
                 {
                     //  If it is, then need to check what the current rotation is
                     if (transform.rotation.eulerAngles.z >= 90)
@@ -347,7 +323,7 @@ public class Figure : MonoBehaviour
                 }
 
                 //  Delay for the move when button held
-                if (_verticalTimer < continuousVerticalSpeed)
+                if (_verticalTimer < Game.instance._continuousVerticalSpeed)
                 {
                     _verticalTimer += Time.deltaTime;
                     return;
@@ -378,11 +354,11 @@ public class Figure : MonoBehaviour
                 Game.instance.DeleteRow();
                 if (Game.instance.CheckIsAboveGrid(this))
                 {
-                    MenuSystem.instance.GameOver(Game.instance.currentLevel, Game.currentScore);
-                    Game.gameOver = true;
+                    MenuSystem.instance.GameOver(Game.instance.currentLevel, Game.instance.currentScore);
+                    Game.instance.gameOver = true;
                 }
                 Game.instance.SpawnNextFigure();
-                Game.currentScore += individualScore;
+                Game.instance.currentScore += _individualScore;
 
                 enabled = false;
             }
@@ -414,4 +390,37 @@ public class Figure : MonoBehaviour
             return true;
         }
     }
+
+    private bool CheckLeftOrRightMoveOneceTouch(Touch touch) => touch.phase == TouchPhase.Ended &&
+        (touch.position.x > Screen.width / 2 || touch.position.x < Screen.width / 2);
+
+    private bool CheckDownMoveOneceTouch(Touch touch) => touch.phase == TouchPhase.Ended &&
+        (touch.position.x < Screen.width / 2 && touch.position.y < Screen.height / 3);
+
+    private void ResetBtnPressedTimersVertical()
+    {
+        _movedImmediateHorizontal = false;
+        _horizontalTimer = 0;
+        _buttonDownWaitTimerHorizontal = 0;
+    }
+
+    private void ResetBtnPressedHorizontal()
+    {
+        _movedImmediateVertical = false;
+        _verticalTimer = 0;
+        _buttonDownWaitTimerVertical = 0;
+    }
+
+    private bool WannaMoveRightTouch(Touch touch) => touch.phase == TouchPhase.Stationary &&
+        (touch.position.x > Screen.width / 2 && touch.position.y > Screen.height / 4);
+
+    private bool WannaMoveLeftTouch(Touch touch) => touch.phase == TouchPhase.Stationary &&
+        (touch.position.x < Screen.width / 2 && touch.position.y > Screen.height / 4);
+
+    private bool WannaMoveDownTouch(Touch touch) => touch.phase == TouchPhase.Stationary &&
+        (touch.position.x < Screen.width / 2 && touch.position.y < Screen.height / 4);
+
+    private bool WannaRotateTouch(Touch touch) => touch.phase == TouchPhase.Ended &&
+        (touch.position.x > Screen.width / 2 && touch.position.y < Screen.height / 4);
+
 }

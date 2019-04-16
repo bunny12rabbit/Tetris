@@ -6,48 +6,62 @@ using UnityEngine;
 public class Game : MonoBehaviour
 {
     #region Variables
-    #region Public static variables
-    public static Game instance = null; // Instance of an Object
-    
-    //  Width and Height of gaming field
-    public static int gridWidth = 10;
-    public static int gridHeight = 20;
-
-    public static bool gameOver = false;
-    
+    #region Static Variables
     public static bool startingAtLevelZero;
     public static int startingLevel;
 
-    public static Transform[,] grid = new Transform[gridWidth, gridHeight]; //  Game field
-    
-    public static float fallSpeed = 1.0f;   // Drops 1 unit in amount of seconds (0.5f would be 1 unit in 0.5 seconds)
+    // Instance of an Object
+    public static Game instance = null;
+    #endregion
 
-    public static int currentScore = 0;
+    #region Public variables to access from outside classes through instance of an object, Hidden in the inspector
+    [HideInInspector] public bool gameOver = false;
+
+    // Drops 1 unit in amount of seconds (0.5f would be 1 unit in 0.5 seconds)
+    [HideInInspector] public float fallSpeed = 1.0f;   
+
+    [HideInInspector] public int currentScore = 0;
+
+    [HideInInspector] public int currentLevel = 0;
     #endregion
 
     #region Private variables shown in the Inspector
-    [SerializeField] private Vector2 _previweFigrePosition = new Vector2(4.5f, -3.5f);   //  Position of preview figure
-    [SerializeField] private string _FiguresFolderInResources = "Prefabs"; //  Folder name in Resources folder, where the figure's prefabs are stored
+    //  Position of preview figure
+    [SerializeField] private Vector2 _previewFigrePosition = new Vector2(4.5f, -3.5f);
+
+    //  Folder name in Resources folder, where the figure's prefabs are stored
+    [SerializeField] private string _FiguresFolderInResources = "Prefabs"; 
+    
+    //  Amount of lines to clear required for level up
+    [SerializeField] private int _linesToClearForLevelUp = 10;
+
+    //  Width and Height of gaming field
+    [Header("Game field size")]
+    [SerializeField] private int _gridWidth = 10;
+    [SerializeField] private int _gridHeight = 20;
 
     //  Score u get for clearing number of lines
+    [Header("Score for cleared lines")]
     [SerializeField] private int _scoreOneLine = 50;
     [SerializeField] private int _scoreTwoLines = 100;
     [SerializeField] private int _scoreThreeLines = 300;
     [SerializeField] private int _scoreFourLines = 1200;
+
     //  Score multiplyer for number of lines cleared
+    [Header("Score multiplyer for cleard lines")]
     [SerializeField] private int _oneLineMultiplyer = 20;
     [SerializeField] private int _twoLinesMultiplyer = 25;
     [SerializeField] private int _threeLinesMultiplyer = 30;
     [SerializeField] private int _fourLinesMultiplyer = 40;
 
-    [SerializeField] private int _linesToClearForLevelUp = 10; //  Amount of lines to clear required for level up
-    
     //  Audio clips
+    [Header("Audio")]
     [SerializeField] private AudioClip _moveSound;
     [SerializeField] private AudioClip _landSound;
     [SerializeField] private AudioClip _clearedLineSound;
 
     //  UI Score and Level texts
+    [Header("Score and level text reference")]
     [SerializeField] private TextMeshProUGUI _scoreText;
     [SerializeField] private TextMeshProUGUI _levelText;
     #endregion
@@ -57,20 +71,34 @@ public class Game : MonoBehaviour
     public GameObject scoreText;
     public GameObject levelText;
 
-    public int currentLevel = 0;
+    [Header("The delay while moving when button is held")]
+    //  The delay which the figure will have while moving when the down button is held
+    public float _continuousVerticalSpeed = 0.01f;
+    //  The delay which the figure will have while moving when the left or right buttons are held
+    public float _continuousHorizontalSpeed = 0.05f;
+
+    [Header("Score bonus for quck setup figure")]
+    //  The score that player suppose to get if he immediately set the figure down
+    public int individualScore = 100;
     #endregion
 
     #region Private variables
-    private int _numberOfRowsToClear = 0;   //  Lines cleared at once
-    private int _numLinesCleared = 0;   //  Lines cleared at the current level
-    private int _startingHighScore; //  Stored High Score
+    //  Game field
+    private Transform[,] grid;
+    //  Lines cleared at once
+    private int _numberOfRowsToClear = 0;
+    //  Lines cleared at the current level
+    private int _numLinesCleared = 0;
+    //  Stored High Score
+    private int _startingHighScore; 
 
     private GameObject _nextFigure;
     private GameObject _previewFigure;
 
     private AudioSource _audioSource;
 
-    private bool _gameStarted = false;  //  First instantiation of the figure at the beginning of the game
+    //  First instantiation of the figure at the beginning of the game
+    private bool _gameStarted = false;  
 
     #endregion
 
@@ -91,8 +119,9 @@ public class Game : MonoBehaviour
     #endregion
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
+        grid = new Transform[_gridWidth, _gridHeight];
         currentLevel = startingLevel;
         currentScore = 0;
         _scoreText.SetText("0");
@@ -103,7 +132,7 @@ public class Game : MonoBehaviour
         SpawnNextFigure();
     }
 
-    void Update()
+    private void Update()
     {
         UpdateScore();
         UpdateUI();
@@ -114,7 +143,7 @@ public class Game : MonoBehaviour
     /// <summary>
     /// Updates the level every linesToClear lines cleared (Default is 10)
     /// </summary>
-    void UpdateLevel()
+    private void UpdateLevel()
     {
         if ((startingAtLevelZero) || (!startingAtLevelZero && _numLinesCleared / _linesToClearForLevelUp > startingLevel))
         {
@@ -123,7 +152,7 @@ public class Game : MonoBehaviour
     }
 
     //  Update falling Speed of the figure, depending on level
-    void UpdateSpeed()
+    private void UpdateSpeed()
     {
         fallSpeed = 1.0f - ((float)currentLevel * 0.1f);
     }
@@ -234,12 +263,12 @@ public class Game : MonoBehaviour
     /// <returns></returns>
     public bool CheckIsAboveGrid(Figure figure)
     {
-        for (int x = 0; x < gridWidth; x++)
+        for (int x = 0; x < _gridWidth; x++)
         {
             foreach (Transform block in figure.transform)
             {
                 Vector2 pos = Round(block.position);
-                if (pos.y > gridHeight - 1)
+                if (pos.y > _gridHeight - 1)
                 {
                     return true;
                 }
@@ -254,7 +283,7 @@ public class Game : MonoBehaviour
     /// </summary>
     /// <param name="pos"></param>
     /// <returns></returns>
-    public bool CheckIsInsideBorder(Vector2 pos) => (int)pos.x >= 0 && (int)pos.x < gridWidth && (int)pos.y >= 0;
+    public bool CheckIsInsideBorder(Vector2 pos) => (int)pos.x >= 0 && (int)pos.x < _gridWidth && (int)pos.y >= 0;
 
     /// <summary>
     /// Determinate if there's a full row at the specified y
@@ -264,7 +293,7 @@ public class Game : MonoBehaviour
     public bool IsFullRowAt(int y)
     {
         // The y parametr, it's the row we will iterate over in the grid array in order to check each x possition for a transform
-        for (int x = 0; x < gridWidth; x++)
+        for (int x = 0; x < _gridWidth; x++)
         {
             // If we find the position that returns NULL instead of a transform, then we know that this row isn't full
             if (grid[x, y] == null)
@@ -286,7 +315,7 @@ public class Game : MonoBehaviour
     /// <param name="y"></param>
     public void DeleteBlockAt(int y)
     {
-        for (int x = 0; x < gridWidth; x++)
+        for (int x = 0; x < _gridWidth; x++)
         {
             Destroy(grid[x, y].gameObject);
             grid[x, y] = null;
@@ -300,7 +329,7 @@ public class Game : MonoBehaviour
     public void MoveRowDown(int y)
     {
         /// Iterate over each block in the row of the y coordinate
-        for (int x = 0; x < gridWidth; x++)
+        for (int x = 0; x < _gridWidth; x++)
         {
             //  Check if the current x and y in the grid array doesn't equal null
             if (grid[x, y] != null)
@@ -323,7 +352,7 @@ public class Game : MonoBehaviour
     /// <param name="y"></param>
     public void MoveAllRawsDown(int y)
     {
-        for (int i = y; i < gridHeight; i++)
+        for (int i = y; i < _gridHeight; i++)
         {
             MoveRowDown(i);
         }
@@ -334,7 +363,7 @@ public class Game : MonoBehaviour
     /// </summary>
     public void DeleteRow()
     {
-        for (int y = 0; y < gridHeight; y++)
+        for (int y = 0; y < _gridHeight; y++)
         {
             if (IsFullRowAt(y))
             {
@@ -352,10 +381,10 @@ public class Game : MonoBehaviour
     public void UpdateGrid(Figure figure)
     {
         //  Update our grid array. Doing this by starting a for loop that iterates over all the grid rows starting at 0
-        for (int y = 0; y < gridHeight; y++)
+        for (int y = 0; y < _gridHeight; y++)
         {
             //  For each row, iterate over each individual x coordinate that represents a spot on the grid where a block could be
-            for (int x = 0; x < gridWidth; x++)
+            for (int x = 0; x < _gridWidth; x++)
             {
                 //  For each iteration, checking the grid array for a null value
                 if (grid[x, y] != null)
@@ -377,7 +406,7 @@ public class Game : MonoBehaviour
             Vector2 pos = Round(block.position);
 
             //  Then checking the position of the block to make sure it's below the top line of the grid
-            if (pos.y < gridHeight)
+            if (pos.y < _gridHeight)
             {
                 //  If it is, then setting the block (transform) at the position of the block
                 grid[(int)pos.x, (int)pos.y] = block;
@@ -392,7 +421,7 @@ public class Game : MonoBehaviour
     /// </summary>
     /// <param name="pos">Position</param>
     /// <returns></returns>
-    public Transform GetTransformAtGridPosition(Vector2 pos) => (pos.y > gridHeight - 1) ? null : grid[(int)pos.x, (int)pos.y];
+    public Transform GetTransformAtGridPosition(Vector2 pos) => (pos.y > _gridHeight - 1) ? null : grid[(int)pos.x, (int)pos.y];
 
     /// <summary>
     /// Spawns the next figure and preview figure from the resources asset folder using the GetRandomFigure method to select a random prefab
@@ -404,7 +433,7 @@ public class Game : MonoBehaviour
         {
             _gameStarted = true;
             _nextFigure = (GameObject)Instantiate(Resources.Load(GetRandomFigure(), typeof(GameObject)), new Vector2(5.0f, 20.0f), Quaternion.identity);
-            _previewFigure = (GameObject)Instantiate(Resources.Load(GetRandomFigure(), typeof(GameObject)), _previweFigrePosition, Quaternion.identity);
+            _previewFigure = (GameObject)Instantiate(Resources.Load(GetRandomFigure(), typeof(GameObject)), _previewFigrePosition, Quaternion.identity);
             _previewFigure.GetComponent<Figure>().enabled = false;
         }
         //  Normal spawning of next figure and preview figure
@@ -414,7 +443,7 @@ public class Game : MonoBehaviour
             _nextFigure = _previewFigure;
             _nextFigure.GetComponent<Figure>().enabled = true;
 
-            _previewFigure = (GameObject)Instantiate(Resources.Load(GetRandomFigure(), typeof(GameObject)), _previweFigrePosition, Quaternion.identity);
+            _previewFigure = (GameObject)Instantiate(Resources.Load(GetRandomFigure(), typeof(GameObject)), _previewFigrePosition, Quaternion.identity);
             _previewFigure.GetComponent<Figure>().enabled = false;
 
         }
@@ -432,7 +461,7 @@ public class Game : MonoBehaviour
     /// a different prefab name to the randomFigureName variable
     /// </summary>
     /// <returns></returns>
-    string GetRandomFigure()
+    private string GetRandomFigure()
     {
         int randomFigure = Random.Range(1, 8);
         string randomFigureName = "";

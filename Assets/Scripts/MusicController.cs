@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class MusicController : MonoBehaviour
 {
-    public static MusicController instance = null;  //  Instance of an object
+    //  Instance of an object
+    public static MusicController instance = null; 
 
     public AudioClip[] music;  
     public AudioClip mainTheme;

@@ -174,221 +174,220 @@ public class Figure : MonoBehaviour
         }
 #endif
         }
-        
+    }
 
-        //  Moves the figure Right
-        void MoveRight()
+    //  Moves the figure Right
+    private void MoveRight()
+    {
+        //  Move when button pressed just once
+        if (_movedImmediateHorizontal)
         {
-            //  Move when button pressed just once
-            if (_movedImmediateHorizontal)
+            if (_buttonDownWaitTimerHorizontal < _buttonDownDelay)
             {
-                if (_buttonDownWaitTimerHorizontal < _buttonDownDelay)
-                {
-                    _buttonDownWaitTimerHorizontal += Time.deltaTime;
-                    return;
-                }
-
-                //  Delay between the moves when button held
-                if (_horizontalTimer < Game.instance._continuousHorizontalSpeed)
-                {
-                    _horizontalTimer += Time.deltaTime;
-                    return;
-                }
+                _buttonDownWaitTimerHorizontal += Time.deltaTime;
+                return;
             }
 
-            if (!_movedImmediateHorizontal)
+            //  Delay between the moves when button held
+            if (_horizontalTimer < Game.instance._continuousHorizontalSpeed)
             {
-                _movedImmediateHorizontal = true;
-            }
-
-            _horizontalTimer = 0;    //  Reset the timer
-
-            //  First attemt to move the figure to the right
-            transform.position += new Vector3(1, 0, 0);
-
-            //  Then check if the figure is at a valid position
-            if (CheckIsValidPosition())
-            {
-                //  If it is, then call the UpdateGrid method which records this figure's new position
-                Game.instance.UpdateGrid(this);
-                Game.instance.PlayMoveAudio();
-            }
-            else
-            {
-                //  If it isn't then move the figure back to the left
-                transform.position += new Vector3(-1, 0, 0);
+                _horizontalTimer += Time.deltaTime;
+                return;
             }
         }
 
-        //  Moves the figure Left
-        void MoveLeft()
+        if (!_movedImmediateHorizontal)
         {
-            //  Move when button pressed just once
-            if (_movedImmediateHorizontal)
-            {
-                if (_buttonDownWaitTimerHorizontal < _buttonDownDelay)
-                {
-                    _buttonDownWaitTimerHorizontal += Time.deltaTime;
-                    return;
-                }
+            _movedImmediateHorizontal = true;
+        }
 
-                //  Delay for the move when button held
-                if (_horizontalTimer < Game.instance._continuousHorizontalSpeed)
-                {
-                    _horizontalTimer += Time.deltaTime;
-                    return;
-                }
-            }
+        _horizontalTimer = 0;    //  Reset the timer
 
-            if (!_movedImmediateHorizontal)
-            {
-                _movedImmediateHorizontal = true;
-            }
+        //  First attemt to move the figure to the right
+        transform.position += new Vector3(1, 0, 0);
 
-            _horizontalTimer = 0;    //  Reset the timer
-
+        //  Then check if the figure is at a valid position
+        if (CheckIsValidPosition())
+        {
+            //  If it is, then call the UpdateGrid method which records this figure's new position
+            Game.instance.UpdateGrid(this);
+            Game.instance.PlayMoveAudio();
+        }
+        else
+        {
+            //  If it isn't then move the figure back to the left
             transform.position += new Vector3(-1, 0, 0);
+        }
+    }
 
-            if (CheckIsValidPosition())
+    //  Moves the figure Left
+    private void MoveLeft()
+    {
+        //  Move when button pressed just once
+        if (_movedImmediateHorizontal)
+        {
+            if (_buttonDownWaitTimerHorizontal < _buttonDownDelay)
             {
-                Game.instance.UpdateGrid(this);
-                Game.instance.PlayMoveAudio();
+                _buttonDownWaitTimerHorizontal += Time.deltaTime;
+                return;
             }
-            else
+
+            //  Delay for the move when button held
+            if (_horizontalTimer < Game.instance._continuousHorizontalSpeed)
             {
-                transform.position += new Vector3(1, 0, 0);
+                _horizontalTimer += Time.deltaTime;
+                return;
             }
         }
 
-        //  Rotates the figure
-        void Rotate()
+        if (!_movedImmediateHorizontal)
         {
-            //  The up key was pressed, let's fires check if the figure is allowed to rotate
-            if (_allowRotation)
+            _movedImmediateHorizontal = true;
+        }
+
+        _horizontalTimer = 0;    //  Reset the timer
+
+        transform.position += new Vector3(-1, 0, 0);
+
+        if (CheckIsValidPosition())
+        {
+            Game.instance.UpdateGrid(this);
+            Game.instance.PlayMoveAudio();
+        }
+        else
+        {
+            transform.position += new Vector3(1, 0, 0);
+        }
+    }
+
+    //  Rotates the figure
+    private void Rotate()
+    {
+        //  The up key was pressed, let's fires check if the figure is allowed to rotate
+        if (_allowRotation)
+        {
+            //  If it is, then need to check if the rotation is limited to just back and forth
+            if (_limitRotation)
             {
-                //  If it is, then need to check if the rotation is limited to just back and forth
-                if (_limitRotation)
+                //  If it is, then need to check what the current rotation is
+                if (transform.rotation.eulerAngles.z >= 90)
                 {
-                    //  If it is, then need to check what the current rotation is
-                    if (transform.rotation.eulerAngles.z >= 90)
-                    {
-                        //  If it's at 90 then we know it was already rotated, so we rotate it back by -90
-                        transform.Rotate(0, 0, -90);
-                    }
-                    else
-                    {
-                        //  If it isn't, then we rotate it to 90
-                        transform.Rotate(0, 0, 90);
-                    }
+                    //  If it's at 90 then we know it was already rotated, so we rotate it back by -90
+                    transform.Rotate(0, 0, -90);
                 }
                 else
                 {
-                    //  If it isn't, then rotate it to 90
+                    //  If it isn't, then we rotate it to 90
+                    transform.Rotate(0, 0, 90);
+                }
+            }
+            else
+            {
+                //  If it isn't, then rotate it to 90
+                transform.Rotate(0, 0, 90);
+            }
+
+            //  Now we check if the figure is at a valid position after attempting a rotation
+            if (CheckIsValidPosition())
+            {
+                //  If the position is valid, we update the grid
+                Game.instance.UpdateGrid(this);
+                Game.instance.PlayRotateAudio();
+            }
+            else
+            {
+                //  if it isn't, than rotate it back -90
+                if (transform.rotation.eulerAngles.z >= 90)
+                {
+                    transform.Rotate(0, 0, -90);
+                }
+                else
+                {
                     transform.Rotate(0, 0, 90);
                 }
 
-                //  Now we check if the figure is at a valid position after attempting a rotation
-                if (CheckIsValidPosition())
-                {
-                    //  If the position is valid, we update the grid
-                    Game.instance.UpdateGrid(this);
-                    Game.instance.PlayRotateAudio();
-                }
-                else
-                {
-                    //  if it isn't, than rotate it back -90
-                    if (transform.rotation.eulerAngles.z >= 90)
-                    {
-                        transform.Rotate(0, 0, -90);
-                    }
-                    else
-                    {
-                        transform.Rotate(0, 0, 90);
-                    }
-
-                }
             }
         }
+    }
 
-        //  Moves the figure down, and if it's above the grid, calling GameOver method
-        void MoveDown()
+    //  Moves the figure down, and if it's above the grid, calling GameOver method
+    private void MoveDown()
+    {
+        //  Move when button pressed just once
+        if (_movedImmediateVertical)
         {
-            //  Move when button pressed just once
-            if (_movedImmediateVertical)
+            if (_buttonDownWaitTimerVertical < _buttonDownDelay)
             {
-                if (_buttonDownWaitTimerVertical < _buttonDownDelay)
-                {
-                    _buttonDownWaitTimerVertical += Time.deltaTime;
-                    return;
-                }
-
-                //  Delay for the move when button held
-                if (_verticalTimer < Game.instance._continuousVerticalSpeed)
-                {
-                    _verticalTimer += Time.deltaTime;
-                    return;
-                }
+                _buttonDownWaitTimerVertical += Time.deltaTime;
+                return;
             }
 
-            if (!_movedImmediateVertical)
+            //  Delay for the move when button held
+            if (_verticalTimer < Game.instance._continuousVerticalSpeed)
             {
-                _movedImmediateVertical = true;
+                _verticalTimer += Time.deltaTime;
+                return;
             }
-
-            _verticalTimer = 0;  //  Reset the timer
-
-            transform.position += new Vector3(0, -1, 0);
-
-            if (CheckIsValidPosition())
-            {
-                Game.instance.UpdateGrid(this);
-
-                if (Input.GetKey(KeyCode.DownArrow) || _moveDown)
-                {
-                    Game.instance.PlayMoveAudio();
-                }
-            }
-            else
-            {
-                transform.position += new Vector3(0, 1, 0);
-                Game.instance.DeleteRow();
-                if (Game.instance.CheckIsAboveGrid(this))
-                {
-                    MenuSystem.instance.GameOver(Game.instance.currentLevel, Game.instance.currentScore);
-                    Game.instance.gameOver = true;
-                }
-                Game.instance.SpawnNextFigure();
-                Game.instance.currentScore += _individualScore;
-
-                enabled = false;
-            }
-
-            _fall = Time.time;
         }
 
-        /// <summary>
-        /// Checks is valid position
-        /// </summary>
-        /// <returns><c>true</c>, if is valid position was checked, <c>false</c> otherwise</returns>
-        bool CheckIsValidPosition()
+        if (!_movedImmediateVertical)
         {
-            foreach (Transform block in transform)
-            {
-                Vector2 pos = Game.instance.Round(block.position);
-
-                if (Game.instance.CheckIsInsideBorder(pos) == false)
-                {
-                    return false;
-                }
-
-                if (Game.instance.GetTransformAtGridPosition(pos) != null &&
-                    Game.instance.GetTransformAtGridPosition(pos).parent != transform)
-                {
-                    return false;
-                }
-            }
-            return true;
+            _movedImmediateVertical = true;
         }
+
+        _verticalTimer = 0;  //  Reset the timer
+
+        transform.position += new Vector3(0, -1, 0);
+
+        if (CheckIsValidPosition())
+        {
+            Game.instance.UpdateGrid(this);
+
+            if (Input.GetKey(KeyCode.DownArrow) || _moveDown)
+            {
+                Game.instance.PlayMoveAudio();
+            }
+        }
+        else
+        {
+            transform.position += new Vector3(0, 1, 0);
+            Game.instance.DeleteRow();
+            if (Game.instance.CheckIsAboveGrid(this))
+            {
+                MenuSystem.instance.GameOver(Game.instance.currentLevel, Game.instance.currentScore);
+                Game.instance.gameOver = true;
+            }
+            Game.instance.SpawnNextFigure();
+            Game.instance.currentScore += _individualScore;
+
+            enabled = false;
+        }
+
+        _fall = Time.time;
+    }
+
+    /// <summary>
+    /// Checks is valid position
+    /// </summary>
+    /// <returns><c>true</c>, if is valid position was checked, <c>false</c> otherwise</returns>
+    private bool CheckIsValidPosition()
+    {
+        foreach (Transform block in transform)
+        {
+            Vector2 pos = Game.instance.Round(block.position);
+
+            if (Game.instance.CheckIsInsideBorder(pos) == false)
+            {
+                return false;
+            }
+
+            if (Game.instance.GetTransformAtGridPosition(pos) != null &&
+                Game.instance.GetTransformAtGridPosition(pos).parent != transform)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private bool CheckLeftOrRightMoveOneceTouch(Touch touch) => touch.phase == TouchPhase.Ended &&

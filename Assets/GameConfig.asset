@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 532d9b82ce887f346bef7cf959076e9d, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: 
+  spawnPosition: {x: 5, y: 20}
+  buttonDownDelay: 0.05
+  previewFigurePosition: {x: 5, y: -3.5}
+  linesToClearForLevelUp: 10
+  gridWidth: 10
+  gridHeight: 20
+  figures:
+  - {fileID: 447624361067701917, guid: 44ccb19232c4c134daf5289ec5fd4c04, type: 3}
+  - {fileID: 2231085115820746179, guid: dbefe853d7dea434a92df440e4af5bf9, type: 3}
+  - {fileID: 8195455803734252701, guid: 32c7917b7b8a3ce469ee454df9f6716a, type: 3}
+  - {fileID: 6750741022332451961, guid: 0c0ac9a46fb81e74cb7a244d0eb770c6, type: 3}
+  - {fileID: 665388911447221081, guid: 37e10740ed141ee43aba56b517cd0579, type: 3}
+  - {fileID: 3345326613351766906, guid: 006830f31ebd3854e87e4608ff1c6e78, type: 3}
+  - {fileID: 8221606833001684888, guid: f7d1e93dccbeb284087fc8b08ca5037b, type: 3}
+  moveSound: {fileID: 8300000, guid: 5b8a9cb3dbf5955469c4da23865a4ffc, type: 3}
+  landSound: {fileID: 8300000, guid: 1354d48b008759a49b1545357f07c870, type: 3}
+  clearedLineSound: {fileID: 8300000, guid: a4685cf4754928840a81bb102221015e, type: 3}
+  music:
+  - {fileID: 8300000, guid: 89b0db9b93ebbe74b9f5135f4988d5ea, type: 3}
+  - {fileID: 8300000, guid: 00d063c048fac5d4795bdff6d18308a5, type: 3}
+  mainTheme: {fileID: 8300000, guid: d03a5bb5177ad2e429f026a81a3f68ff, type: 3}
+  continuousVerticalSpeedDelay: 0.01
+  continuousHorizontalSpeedDelay: 0.05
+  individualScore: 100
+  decrementBonusScoreEachSecBy: 10
+  linesScores:
+  - numberOfLines: 1
+    score: 50
+    multiplier: 20
+  - numberOfLines: 2
+    score: 100
+    multiplier: 25
+  - numberOfLines: 3
+    score: 300
+    multiplier: 30
+  - numberOfLines: 4
+    score: 1200
+    multiplier: 40
